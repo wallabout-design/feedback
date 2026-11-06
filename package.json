@@ -1,0 +1,44 @@
+{
+  "name": "@wallabout-design/feedback",
+  "version": "0.1.0",
+  "description": "Hidden 'send feedback' link for wallabout sites: a prefilled email with the page, viewport, build and highlighted text",
+  "license": "UNLICENSED",
+  "repository": "github:wallabout-design/feedback",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "default": "./dist/react.js"
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.test.json",
+    "test": "npm run build && playwright test"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.19.2",
+    "@types/react": "19.2.18",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "@types/react-dom": "19.2.7",
+    "typescript": "6.0.3"
+  }
+}
