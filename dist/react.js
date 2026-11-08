@@ -7,5 +7,5 @@ import { FEEDBACK_ADDRESS } from './mailto.js';
 export function FeedbackLink({ siteId, address, className }) {
     const ref = useRef(null);
     useEffect(() => (ref.current ? initFeedbackLink(ref.current, { siteId, address }) : undefined), [siteId, address]);
-    return (_jsx("a", { ref: ref, className: className, href: `mailto:${address ?? FEEDBACK_ADDRESS}`, target: "_blank", rel: "noopener", hidden: true, children: "send feedback" }));
+    return (_jsx("a", { ref: ref, className: className, href: `mailto:${address ?? FEEDBACK_ADDRESS}`, hidden: true, children: "send feedback" }));
 }

@@ -17,7 +17,11 @@ export interface FeedbackContext {
     build: string;
     /** Text the reviewer had highlighted, if any. */
     selection?: string;
+    /** Short random code that keeps each note apart in the inbox, such as `k7mq`. */
+    id?: string;
 }
+/** A fresh 4-character code for the subject line (31^4, about 920,000 values). */
+export declare function feedbackId(): string;
 /** Two decimals at most: Firefox zoom reports ratios like 1.8181818181818181. */
 export declare const roundDpr: (dpr: number) => number;
 export declare function feedbackMailto(c: FeedbackContext, { siteId, address }: FeedbackOptions): string;

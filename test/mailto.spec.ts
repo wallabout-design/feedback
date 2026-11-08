@@ -1,6 +1,6 @@
 // Unit tests for the mailto: builder (no browser).
 import { test, expect } from '@playwright/test';
-import { FEEDBACK_ADDRESS, MAX_SELECTION, feedbackMailto, roundDpr, type FeedbackContext } from '../dist/index.js';
+import { FEEDBACK_ADDRESS, MAX_SELECTION, feedbackId, feedbackMailto, roundDpr, type FeedbackContext } from '../dist/index.js';
 
 const context: FeedbackContext = {
   url: 'https://example.com/stay?x=1',
@@ -21,6 +21,16 @@ test('subject is [site] /path, sent to the default address', () => {
   expect(mail.to).toBe(FEEDBACK_ADDRESS);
   expect(FEEDBACK_ADDRESS).toBe('feedback@wallabout.design');
   expect(mail.subject).toBe('[rr] /stay');
+});
+
+test('an id goes at the end of the subject', () => {
+  expect(read(feedbackMailto({ ...context, id: 'k7mq' }, { siteId: 'rr' })).subject).toBe('[rr] /stay #k7mq');
+});
+
+test('feedbackId is 4 characters with no look-alikes (0 o 1 l i)', () => {
+  const ids = Array.from({ length: 200 }, feedbackId);
+  for (const id of ids) expect(id).toMatch(/^[2-9a-hjkmnp-z]{4}$/);
+  expect(new Set(ids).size).toBeGreaterThan(190);
 });
 
 test('the address can be overridden', () => {

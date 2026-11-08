@@ -13,7 +13,7 @@ export function FeedbackLink({ siteId, address, className }: FeedbackLinkProps) 
   const ref = useRef<HTMLAnchorElement>(null);
   useEffect(() => (ref.current ? initFeedbackLink(ref.current, { siteId, address }) : undefined), [siteId, address]);
   return (
-    <a ref={ref} className={className} href={`mailto:${address ?? FEEDBACK_ADDRESS}`} target="_blank" rel="noopener" hidden>
+    <a ref={ref} className={className} href={`mailto:${address ?? FEEDBACK_ADDRESS}`} hidden>
       send feedback
     </a>
   );

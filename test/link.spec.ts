@@ -49,7 +49,7 @@ test('the email names the site, page, viewport and build', async ({ page }) => {
   const mail = new URL((await link(page).getAttribute('href'))!);
   expect(mail.protocol).toBe('mailto:');
   expect(mail.pathname).toBe('feedback@wallabout.design');
-  expect(mail.searchParams.get('subject')).toBe('[test] /test/fixture/about.html');
+  expect(mail.searchParams.get('subject')).toMatch(/^\[test\] \/test\/fixture\/about\.html #[2-9a-hjkmnp-z]{4}$/);
   const body = mail.searchParams.get('body')!;
   expect(body).toContain('url: ' + page.url());
   expect(body).toMatch(/viewport: 390x844 @\d+(\.\d{1,2})?x\r\n/);
@@ -62,9 +62,21 @@ test('the address can be overridden', async ({ page }) => {
   expect(new URL((await link(page).getAttribute('href'))!).pathname).toBe('notes@example.com');
 });
 
-test('opens in a new tab', async ({ page }) => {
+test('opens the mail app from this tab, not a pop-up, even from older markup', async ({ page }) => {
   await page.goto(fixture('index', '?feedback'));
-  await expect(link(page)).toHaveAttribute('target', '_blank');
+  await expect(link(page)).toBeVisible();
+  await expect(link(page)).not.toHaveAttribute('target');
+});
+
+test('each click gets a new subject code', async ({ page }) => {
+  await page.goto(fixture('index', '?feedback'));
+  await page.evaluate(() => addEventListener('click', (e) => e.preventDefault(), { capture: true }));
+  const subjects = new Set<string>();
+  for (let i = 0; i < 3; i++) {
+    await link(page).click();
+    subjects.add(new URL((await link(page).getAttribute('href'))!).searchParams.get('subject')!);
+  }
+  expect(subjects.size).toBe(3);
 });
 
 // Click without leaving the page (the mailto: would open a mail app), and return the

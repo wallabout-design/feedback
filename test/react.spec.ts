@@ -8,7 +8,7 @@ import { FeedbackLink } from '../dist/react.js';
 test('renders a hidden link that opens in a new tab', () => {
   const html = renderToStaticMarkup(createElement(FeedbackLink, { siteId: 'rr', className: 'feedback' }));
   expect(html).toBe(
-    '<a class="feedback" href="mailto:feedback@wallabout.design" target="_blank" rel="noopener" hidden="">send feedback</a>',
+    '<a class="feedback" href="mailto:feedback@wallabout.design" hidden="">send feedback</a>',
   );
 });
 
