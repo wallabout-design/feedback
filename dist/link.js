@@ -1,6 +1,6 @@
 // Shows and fills a "send feedback" link. Hidden until a visit with ?feedback turns
 // it on for this browser (?feedback=off turns it off), so ordinary visitors never see it.
-import { feedbackMailto } from './mailto.js';
+import { feedbackId, feedbackMailto } from './mailto.js';
 const KEY = 'feedback';
 /** Text deselected this recently still counts as highlighted. */
 const SELECTION_GRACE_MS = 3000;
@@ -46,7 +46,8 @@ export function initFeedbackLink(link, options) {
         }
     };
     const currentSelection = () => (clearedAt && Date.now() - clearedAt > SELECTION_GRACE_MS ? '' : selected);
-    // Refresh on click, so the viewport is the one the reviewer is looking at.
+    // Refresh on click, so the viewport is the one the reviewer is looking at, and each
+    // email gets its own subject code.
     const update = () => {
         link.href = feedbackMailto({
             url: location.href,
@@ -56,11 +57,15 @@ export function initFeedbackLink(link, options) {
             ua: navigator.userAgent,
             build: document.querySelector('meta[name="build"]')?.content ?? '',
             selection: currentSelection(),
+            id: feedbackId(),
         }, options);
     };
     document.addEventListener('selectionchange', onSelectionChange);
     link.addEventListener('click', update);
     update();
+    // Open the mail app from this tab. A mailto: in a new tab (target="_blank") counts
+    // as a pop-up in some browsers and gets blocked, so drop it from older markup too.
+    link.removeAttribute('target');
     link.hidden = false;
     return () => {
         document.removeEventListener('selectionchange', onSelectionChange);

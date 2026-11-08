@@ -24,13 +24,24 @@ export interface FeedbackContext {
   build: string;
   /** Text the reviewer had highlighted, if any. */
   selection?: string;
+  /** Short random code that keeps each note apart in the inbox, such as `k7mq`. */
+  id?: string;
+}
+
+/** No 0/o, 1/l/i: the code should survive being read aloud or retyped. */
+const ID_ALPHABET = '23456789abcdefghjkmnpqrstuvwxyz';
+
+/** A fresh 4-character code for the subject line (31^4, about 920,000 values). */
+export function feedbackId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(4));
+  return Array.from(bytes, (b) => ID_ALPHABET[b % ID_ALPHABET.length]).join('');
 }
 
 /** Two decimals at most: Firefox zoom reports ratios like 1.8181818181818181. */
 export const roundDpr = (dpr: number): number => Math.round(dpr * 100) / 100;
 
 export function feedbackMailto(c: FeedbackContext, { siteId, address = FEEDBACK_ADDRESS }: FeedbackOptions): string {
-  const subject = `[${siteId}] ${c.path}`;
+  const subject = `[${siteId}] ${c.path}${c.id ? ` #${c.id}` : ''}`;
   const quote = c.selection?.trim().slice(0, MAX_SELECTION);
   const body = [
     ...(quote ? ['about this text:', ...quote.split(/\r?\n/).map((l) => `> ${l}`), ''] : []),

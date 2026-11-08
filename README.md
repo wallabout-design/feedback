@@ -2,12 +2,12 @@
 
 Hidden "send feedback" link for wallabout sites: a prefilled email with the page, viewport, build and highlighted text.
 
-Ordinary visitors never see it. A visit with `?feedback` turns it on for that browser (stored as `localStorage` `feedback=1`), and `?feedback=off` turns it off. The link is a `mailto:` to `feedback@wallabout.design` with the subject `[<siteId>] <path>`. It quotes any highlighted text (up to 500 characters, and still counted for 3 s after the selection clears) and adds the URL, viewport, device pixel ratio, browser and build (from `<meta name="build">`). Nothing is sent until the reviewer sends the email. The feedback routine is described in `standards/feedback.md` in `wallabout-design/standards`.
+Ordinary visitors never see it. A visit with `?feedback` turns it on for that browser (stored as `localStorage` `feedback=1`), and `?feedback=off` turns it off. The link is a `mailto:` to `feedback@wallabout.design` with the subject `[<siteId>] <path> #<id>`, where `<id>` is a fresh 4-character code on each click (no look-alike characters), so every note gets its own thread in the inbox and can be named in a reply. It quotes any highlighted text (up to 500 characters, and still counted for 3 s after the selection clears) and adds the URL, viewport, device pixel ratio, browser and build (from `<meta name="build">`). Nothing is sent until the reviewer sends the email. The feedback routine is described in `standards/feedback.md` in `wallabout-design/standards`.
 
 ## install
 
 ```sh
-npm install github:wallabout-design/feedback#v0.1.0
+npm install github:wallabout-design/feedback#v0.2.0
 ```
 
 ## use
@@ -15,7 +15,7 @@ npm install github:wallabout-design/feedback#v0.1.0
 Any site, from a bundled script (not an inline one, so a CSP that blocks inline scripts is fine):
 
 ```html
-<a href="mailto:feedback@wallabout.design" target="_blank" rel="noopener" hidden data-feedback-link>send feedback</a>
+<a href="mailto:feedback@wallabout.design" hidden data-feedback-link>send feedback</a>
 ```
 
 ```ts
@@ -27,6 +27,8 @@ if (link) initFeedbackLink(link, { siteId: 'wallabout' });
 
 Nothing runs at import time. `initFeedbackLink` returns a function that removes its listeners. Pass `address` to send notes somewhere else.
 
+The link opens the mail app from the same tab. Don't give it `target="_blank"`: some browsers block a `mailto:` in a new tab as a pop-up. `initFeedbackLink` removes the attribute from older markup anyway.
+
 React (React is an optional peer dependency):
 
 ```tsx
@@ -35,7 +37,7 @@ import { FeedbackLink } from '@wallabout-design/feedback/react';
 <FeedbackLink siteId="rr" className="feedback-link" />;
 ```
 
-It renders `<a hidden target="_blank" rel="noopener">send feedback</a>` and calls `initFeedbackLink` in `useEffect`, so it's safe under StrictMode. Style it through `className` with the site's own tokens. Remember the `[hidden] { display: none }` rule if the class sets `display`.
+It renders `<a hidden>send feedback</a>` and calls `initFeedbackLink` in `useEffect`, so it's safe under StrictMode. Style it through `className` with the site's own tokens. Remember the `[hidden] { display: none }` rule if the class sets `display`.
 
 ## why built JS from a git tag
 
