@@ -37,7 +37,7 @@ import { FeedbackLink } from '@wallabout-design/feedback/react';
 <FeedbackLink siteId="rr" className="feedback-link" />;
 ```
 
-It renders `<a hidden>send feedback</a>` and calls `initFeedbackLink` in `useEffect`, so it's safe under StrictMode. Style it through `className` with the site's own tokens. Remember the `[hidden] { display: none }` rule if the class sets `display`.
+It renders `<a hidden data-feedback-link>send feedback</a>` and calls `initFeedbackLink` in `useEffect`, so it's safe under StrictMode. Style it through `className` with the site's own tokens. Remember the `[hidden] { display: none }` rule if the class sets `display`.
 
 ## reserving space at the bottom of the page
 
