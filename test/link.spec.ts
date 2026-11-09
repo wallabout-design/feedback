@@ -123,3 +123,52 @@ test.describe('fractional zoom', () => {
     expect(new URL((await link(page).getAttribute('href'))!).searchParams.get('body')).toContain(' @1.82x\r\n');
   });
 });
+
+// reserve.css, on a page whose footer has a link in the bottom-right corner.
+test.describe('reserve.css', () => {
+  // The element at the centre of the corner link, once scrolled to the bottom.
+  async function cornerHit(page: Page) {
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    return page.evaluate(() => {
+      const corner = document.getElementById('corner')!;
+      const r = corner.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      return hit === corner || corner.contains(hit) ? 'corner' : (hit?.textContent ?? '');
+    });
+  }
+  const removeReserve = (page: Page) => page.evaluate(() => document.querySelector('[data-reserve]')!.remove());
+  const pageBottom = (page: Page) =>
+    page.evaluate(() => ({
+      height: document.documentElement.scrollHeight,
+      padding: getComputedStyle(document.body).paddingBottom,
+    }));
+
+  for (const width of [360, 1440]) {
+    test(`keeps the footer's corner link clickable with feedback on at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto(fixture('footer', '?feedback'));
+      await expect(link(page)).toBeVisible();
+      expect(await cornerHit(page)).toBe('corner');
+      await page.locator('#corner').click();
+      await expect(page).toHaveURL(/about\.html$/);
+    });
+  }
+
+  test('without it, the feedback link covers the corner link (the fixture shows the problem)', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto(fixture('footer', '?feedback'));
+    await expect(link(page)).toBeVisible();
+    await removeReserve(page);
+    expect(await cornerHit(page)).toBe('send feedback');
+  });
+
+  test('changes nothing with feedback off', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto(fixture('footer', '?feedback=off'));
+    await expect(link(page)).toBeHidden();
+    const withReserve = await pageBottom(page);
+    await removeReserve(page);
+    expect(withReserve).toEqual(await pageBottom(page));
+    expect(withReserve.padding).toBe('0px');
+  });
+});

@@ -7,7 +7,7 @@ Ordinary visitors never see it. A visit with `?feedback` turns it on for that br
 ## install
 
 ```sh
-npm install github:wallabout-design/feedback#v0.2.0
+npm install github:wallabout-design/feedback#v0.3.0
 ```
 
 ## use
@@ -37,7 +37,19 @@ import { FeedbackLink } from '@wallabout-design/feedback/react';
 <FeedbackLink siteId="rr" className="feedback-link" />;
 ```
 
-It renders `<a hidden>send feedback</a>` and calls `initFeedbackLink` in `useEffect`, so it's safe under StrictMode. Style it through `className` with the site's own tokens. Remember the `[hidden] { display: none }` rule if the class sets `display`.
+It renders `<a hidden data-feedback-link>send feedback</a>` and calls `initFeedbackLink` in `useEffect`, so it's safe under StrictMode. Style it through `className` with the site's own tokens. Remember the `[hidden] { display: none }` rule if the class sets `display`.
+
+## reserving space at the bottom of the page
+
+The package ships no styles for the link itself. Sites usually fix it at the bottom right of the viewport, where it covers whatever the footer has in that corner once you scroll to the bottom. Import the optional `reserve.css` to keep that corner clear:
+
+```ts
+import '@wallabout-design/feedback/reserve.css';
+```
+
+While the link is shown (any `[data-feedback-link]` without `hidden`, which both the plain markup and `FeedbackLink` render), it pads the bottom of `<body>` by `--feedback-reserve`, 64px by default: the link's height plus its offset from the bottom. If the site's link is taller or sits higher, set the variable, for example `:root { --feedback-reserve: 80px; }`. Ordinary visitors never see the link, so their pages are unchanged.
+
+Import it whenever the link is fixed over the page. The rule keys on the `hidden` attribute, so keep `[hidden] { display: none }` working: if the site's link styles set `display`, add that rule too, or the link shows for every visitor while no space is reserved.
 
 ## why built JS from a git tag
 
@@ -49,7 +61,7 @@ So `dist/` (plain ES modules and `.d.ts` files, built by `tsc`) is committed, an
 
 Node 24 (`.nvmrc`).
 
-- `npm run build`: compile `src/` to `dist/`. Commit `dist/` with the change.
+- `npm run build`: compile `src/` to `dist/` and copy `src/reserve.css` there. Commit `dist/` with the change.
 - `npm run check`: type check the source and tests.
 - `npm test`: build, then run the unit tests (`test/mailto.spec.ts`, `test/react.spec.ts`) and the browser tests on fixture pages (`test/link.spec.ts`, Chromium and WebKit; first run `npx playwright install chromium webkit`).
 
