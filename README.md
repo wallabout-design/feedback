@@ -69,5 +69,13 @@ Node 24 (`.nvmrc`).
 
 1. Merge the change to `main` (PR, squash; `main` is protected).
 2. Bump `version` in `package.json` in that PR.
-3. Tag `main`: `git tag v0.2.0 && git push origin v0.2.0`.
-4. In each site, install the new tag.
+3. Tag the merged commit with an **annotated** tag, push it, and add a GitHub release for it:
+   ```sh
+   git fetch origin
+   git tag -a v0.3.0 -m "v0.3.0: <one line on what changed>" origin/main
+   git cat-file -t v0.3.0   # must print "tag", not "commit"
+   git push origin v0.3.0
+   gh release create v0.3.0 --verify-tag --generate-notes
+   ```
+   Don't use a plain `git tag v0.3.0`, and don't let `gh release create` make the tag itself: both make a lightweight tag. Dependabot missed the lightweight `v0.2.0` and opened site#99 to "bump" sites from v0.2.0 back down to v0.1.0.
+4. In each site, install the new tag. Dependabot also opens a PR for it within the week.
