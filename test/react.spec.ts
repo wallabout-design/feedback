@@ -5,10 +5,10 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { FeedbackLink } from '../dist/react.js';
 
-test('renders a hidden link that opens in a new tab', () => {
+test('renders a hidden link marked data-feedback-link, like the plain markup', () => {
   const html = renderToStaticMarkup(createElement(FeedbackLink, { siteId: 'rr', className: 'feedback' }));
   expect(html).toBe(
-    '<a class="feedback" href="mailto:feedback@wallabout.design" hidden="">send feedback</a>',
+    '<a class="feedback" href="mailto:feedback@wallabout.design" hidden="" data-feedback-link="">send feedback</a>',
   );
 });
 

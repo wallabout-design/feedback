@@ -1,0 +1,7 @@
+/* Optional. While the feedback link is shown, pad the bottom of the page so the
+   fixed link doesn't cover whatever the site has in its footer's bottom-right corner.
+   It only reserves space; each site styles the link itself. Set --feedback-reserve
+   (the link's height plus its offset from the bottom) if the site's link is taller. */
+body:has([data-feedback-link]:not([hidden])) {
+  padding-bottom: var(--feedback-reserve, 64px);
+}
