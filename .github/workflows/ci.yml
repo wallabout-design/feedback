@@ -10,9 +10,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The installed Playwright version, which names the container image below, so
+  # the two can never drift apart when Dependabot updates Playwright.
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
   test:
+    needs: playwright
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Playwright's own image: the browsers and their system libraries are in it.
+    # Installing them on each run (`playwright install --with-deps`) downloads
+    # from Ubuntu's mirror, and when that stalled, jobs hung until they timed
+    # out (4 of 10 burn-in runs on 2026-11-10). Tests must not need the network.
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.playwright.outputs.version }}-noble
+      options: --ipc=host
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -20,14 +40,15 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium webkit
       # Everything: type check, build, unit tests, browser tests. The same
       # command as on a laptop (standards/testing.md in wallabout-design/standards).
       - run: npm run verify
       # Sites install dist/ straight from git, so it must match src/.
       - name: dist/ is up to date
         if: always()
-        run: git diff --exit-code -- dist || (echo "Run npm run build and commit dist/." && exit 1)
+        # In the container the checkout belongs to another user, so git needs
+        # telling that the directory is safe.
+        run: git -c safe.directory="$GITHUB_WORKSPACE" diff --exit-code -- dist || (echo "Run npm run build and commit dist/." && exit 1)
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
