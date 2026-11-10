@@ -48,8 +48,20 @@ jobs:
           echo "list=[$(seq -s, 1 "$N")]" >> "$GITHUB_OUTPUT"
 
   # Build, then the unit and browser tests (what `npm test` runs).
+  # The installed Playwright version, which names the container image below, so
+  # the two can never drift apart when Dependabot updates Playwright.
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
   test:
-    needs: plan
+    needs: [plan, playwright]
     name: test ${{ matrix.run }}
     strategy:
       fail-fast: false
@@ -57,6 +69,13 @@ jobs:
         run: ${{ fromJSON(needs.plan.outputs.runs) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Playwright's own image: the browsers and their system libraries are in it.
+    # Installing them on each run (`playwright install --with-deps`) downloads
+    # from Ubuntu's mirror, and when that stalled, jobs hung until they timed
+    # out (4 of 10 burn-in runs on 2026-11-10). Tests must not need the network.
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.playwright.outputs.version }}-noble
+      options: --ipc=host
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -64,7 +83,6 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium webkit
       - run: npm run build
       - run: npm run test:unit -- --repeat-each="$REPEAT_EACH"
       - run: npm run test:e2e -- --retries=0 --repeat-each="$REPEAT_EACH"
@@ -89,7 +107,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100" --paginate \
-            --jq '.jobs[] | select(.name | test("^(plan|report)$") | not) | [(.name | sub(" [0-9]+$"; "")), .name, .conclusion, ((.completed_at | fromdate) - (.started_at | fromdate))] | @tsv' > jobs.tsv
+            --jq '.jobs[] | select(.name | test("^(plan|playwright|report)$") | not) | [(.name | sub(" [0-9]+$"; "")), .name, .conclusion, ((.completed_at | fromdate) - (.started_at | fromdate))] | @tsv' > jobs.tsv
           {
             echo "## burn-in: ${GITHUB_SHA::7}, retries off, repeat-each $REPEAT_EACH"
             echo
