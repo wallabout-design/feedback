@@ -46,7 +46,9 @@ jobs:
       # Sites install dist/ straight from git, so it must match src/.
       - name: dist/ is up to date
         if: always()
-        run: git diff --exit-code -- dist || (echo "Run npm run build and commit dist/." && exit 1)
+        # In the container the checkout belongs to another user, so git needs
+        # telling that the directory is safe.
+        run: git -c safe.directory="$GITHUB_WORKSPACE" diff --exit-code -- dist || (echo "Run npm run build and commit dist/." && exit 1)
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
