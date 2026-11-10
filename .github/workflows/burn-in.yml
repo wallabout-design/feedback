@@ -47,7 +47,7 @@ jobs:
           [[ "$REPEAT_EACH" =~ ^[0-9]+$ && "$REPEAT_EACH" -ge 1 ]] || { echo "repeat_each must be a number"; exit 1; }
           echo "list=[$(seq -s, 1 "$N")]" >> "$GITHUB_OUTPUT"
 
-  # Build, then every Playwright project (as `test` in ci.yml).
+  # Build, then the unit and browser tests (what `npm test` runs).
   test:
     needs: plan
     name: test ${{ matrix.run }}
@@ -65,7 +65,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
-      - run: npm test -- --retries=0 --repeat-each="$REPEAT_EACH"
+      - run: npm run build
+      - run: npm run test:unit -- --repeat-each="$REPEAT_EACH"
+      - run: npm run test:e2e -- --retries=0 --repeat-each="$REPEAT_EACH"
       - if: failure()
         uses: actions/upload-artifact@v7
         with:

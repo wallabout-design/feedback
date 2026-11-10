@@ -63,7 +63,9 @@ Node 24 (`.nvmrc`).
 
 - `npm run build`: compile `src/` to `dist/` and copy `src/reserve.css` there. Commit `dist/` with the change.
 - `npm run check`: type check the source and tests.
-- `npm test`: build, then run the unit tests (`test/mailto.spec.ts`, `test/react.spec.ts`) and the browser tests on fixture pages (`test/link.spec.ts`, Chromium and WebKit; first run `npx playwright install chromium webkit`).
+- `npm run verify`: everything CI runs, in one command: `check`, then `npm test`. Run it before pushing.
+- `npm test`: build, then `npm run test:unit` (`test/mailto.spec.ts` and `test/react.spec.ts`: no server, no browser) and `npm run test:e2e` (`test/link.spec.ts` on fixture pages, in Chromium and WebKit; first run `npx playwright install chromium webkit`).
+- Tests follow `standards/testing.md` in `wallabout-design/standards`. To check for flaky tests: `gh workflow run burn-in.yml -f runs=10`.
 
 ## release
 

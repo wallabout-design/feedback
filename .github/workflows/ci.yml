@@ -20,13 +20,14 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npm run check
-      - run: npm run build
+      - run: npx playwright install --with-deps chromium webkit
+      # Everything: type check, build, unit tests, browser tests. The same
+      # command as on a laptop (standards/testing.md in wallabout-design/standards).
+      - run: npm run verify
       # Sites install dist/ straight from git, so it must match src/.
       - name: dist/ is up to date
+        if: always()
         run: git diff --exit-code -- dist || (echo "Run npm run build and commit dist/." && exit 1)
-      - run: npx playwright install --with-deps chromium webkit
-      - run: npm test
       - if: failure()
         uses: actions/upload-artifact@v7
         with:
