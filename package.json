@@ -23,7 +23,10 @@
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.json && cp src/reserve.css dist/reserve.css",
     "check": "tsc -p tsconfig.test.json",
-    "test": "npm run build && playwright test"
+    "test:unit": "playwright test -c playwright.unit.config.ts",
+    "test:e2e": "playwright test",
+    "test": "npm run build && npm run test:unit && npm run test:e2e",
+    "verify": "npm run check && npm test"
   },
   "peerDependencies": {
     "react": ">=18"
