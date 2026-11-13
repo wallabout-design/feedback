@@ -1,0 +1,21 @@
+name: tag-check
+
+# A release tag must be annotated and match package.json. Dependabot misses
+# lightweight tags and then proposes a downgrade (feedback#9). A failure here
+# emails the pusher; delete the tag and run `npm run release`.
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  tag-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # checkout turns a pushed tag into whatever it points at; fetch the tag
+      # object itself so its type is the one that was pushed.
+      - run: git fetch --force origin "+refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
+      - run: node scripts/tag-check.mjs "$GITHUB_REF_NAME"
