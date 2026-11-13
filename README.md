@@ -64,20 +64,14 @@ Node 24 (`.nvmrc`).
 - `npm run build`: compile `src/` to `dist/` and copy `src/reserve.css` there. Commit `dist/` with the change.
 - `npm run check`: type check the source and tests.
 - `npm run verify`: everything CI runs, in one command: `check`, then `npm test`. Run it before pushing.
-- `npm test`: build, then `npm run test:unit` (`test/mailto.spec.ts` and `test/react.spec.ts`: no server, no browser) and `npm run test:e2e` (`test/link.spec.ts` on fixture pages, in Chromium and WebKit; first run `npx playwright install chromium webkit`).
+- `npm test`: build, then `npm run test:unit` (`test/mailto.spec.ts`, `test/react.spec.ts` and `test/tag-check.spec.ts`: no server, no browser) and `npm run test:e2e` (`test/link.spec.ts` on fixture pages, in Chromium and WebKit; first run `npx playwright install chromium webkit`).
 - Tests follow `standards/testing.md` in `wallabout-design/standards`. To check for flaky tests: `gh workflow run burn-in.yml -f runs=10`.
 
 ## release
 
 1. Merge the change to `main` (PR, squash; `main` is protected).
 2. Bump `version` in `package.json` in that PR.
-3. Tag the merged commit with an **annotated** tag, push it, and add a GitHub release for it:
-   ```sh
-   git fetch origin
-   git tag -a v0.3.0 -m "v0.3.0: <one line on what changed>" origin/main
-   git cat-file -t v0.3.0   # must print "tag", not "commit"
-   git push origin v0.3.0
-   gh release create v0.3.0 --verify-tag --generate-notes
-   ```
-   Don't use a plain `git tag v0.3.0`, and don't let `gh release create` make the tag itself: both make a lightweight tag. Dependabot missed the lightweight `v0.2.0` and opened site#99 to "bump" sites from v0.2.0 back down to v0.1.0.
+3. Run `npm run release`. It reads `version` from `package.json`, checks the tag doesn't exist and CI on `origin/main` is green, makes an **annotated** tag on `origin/main`, checks `git cat-file -t` prints `tag`, pushes it and runs `gh release create --verify-tag --generate-notes`. `npm run release -- --dry-run` does the checks and stops before tagging.
+
+   Don't use a plain `git tag vX.Y.Z`, and don't let `gh release create` make the tag itself: both make a lightweight tag. Dependabot missed the lightweight `v0.2.0` and opened site#99 to "bump" sites from v0.2.0 back down to v0.1.0. As a safety net, `.github/workflows/tag-check.yml` fails when a pushed `v*` tag is lightweight or doesn't match `package.json`; if it does, delete the tag (`git push origin :refs/tags/vX.Y.Z`) and run `npm run release`.
 4. In each site, install the new tag. Dependabot also opens a PR for it within the week.
