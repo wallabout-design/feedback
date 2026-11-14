@@ -43,6 +43,15 @@ test('?feedback=off turns it off again', async ({ page }) => {
   await expect(link(page)).toBeHidden();
 });
 
+for (const value of ['0', 'false', 'no', 'OFF']) {
+  test(`?feedback=${value} turns it off`, async ({ page }) => {
+    await page.goto(fixture('index', '?feedback'));
+    await page.goto(fixture('about', `?feedback=${value}`));
+    await expect(link(page)).toBeHidden();
+    expect(await page.evaluate(() => localStorage.length)).toBe(0);
+  });
+}
+
 test('the email names the site, page, viewport and build', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(fixture('about', '?feedback'));

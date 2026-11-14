@@ -4,10 +4,13 @@ import { feedbackId, feedbackMailto } from './mailto.js';
 const KEY = 'feedback';
 /** Text deselected this recently still counts as highlighted. */
 const SELECTION_GRACE_MS = 3000;
+/** Values of `?feedback=` that turn the link off. */
+const OFF_VALUES = ['off', '0', 'false', 'no'];
 function feedbackEnabled() {
     const flag = new URLSearchParams(location.search).get('feedback');
+    const off = flag !== null && OFF_VALUES.includes(flag.toLowerCase());
     try {
-        if (flag === 'off')
+        if (off)
             localStorage.removeItem(KEY);
         else if (flag !== null)
             localStorage.setItem(KEY, '1');
@@ -16,7 +19,7 @@ function feedbackEnabled() {
         // Storage blocked (private mode in some browsers): show it for this page only.
     }
     if (flag !== null)
-        return flag !== 'off';
+        return !off;
     try {
         return localStorage.getItem(KEY) === '1';
     }

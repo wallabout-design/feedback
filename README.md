@@ -2,7 +2,7 @@
 
 Hidden "send feedback" link for wallabout sites: a prefilled email with the page, viewport, build and highlighted text.
 
-Ordinary visitors never see it. A visit with `?feedback` turns it on for that browser (stored as `localStorage` `feedback=1`), and `?feedback=off` turns it off. The link is a `mailto:` to `feedback@wallabout.design` with the subject `[<siteId>] <path> #<id>`, where `<id>` is a fresh 4-character code on each click (no look-alike characters), so every note gets its own thread in the inbox and can be named in a reply. It quotes any highlighted text (up to 500 characters, and still counted for 3 s after the selection clears) and adds the URL, viewport, device pixel ratio, browser and build (from `<meta name="build">`). Nothing is sent until the reviewer sends the email. The feedback routine is described in `standards/feedback.md` in `wallabout-design/standards`.
+Ordinary visitors never see it. A visit with `?feedback` turns it on for that browser (stored as `localStorage` `feedback=1`), and `?feedback=off` turns it off (so do `0`, `false` and `no`; any other value turns it on). The link is a `mailto:` to `feedback@wallabout.design` with the subject `[<siteId>] <path> #<id>`, where `<id>` is a fresh 4-character code on each click (no look-alike characters), so every note gets its own thread in the inbox and can be named in a reply. It quotes any highlighted text (up to 500 characters, and still counted for 3 s after the selection clears) and adds the URL, viewport, device pixel ratio, browser and build (from `<meta name="build">`). Nothing is sent until the reviewer sends the email. The feedback routine is described in `standards/feedback.md` in `wallabout-design/standards`.
 
 ## install
 
