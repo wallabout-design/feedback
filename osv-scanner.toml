@@ -1,0 +1,8 @@
+# Vulnerabilities that `npm run scan:deps` should not fail on. Each entry needs
+# a `reason` and an `effectiveUntil` date (when the ignore stops applying), so
+# an ignore cannot outlive the reason for it. Use the vulnerability's ID, e.g.
+#
+# [[IgnoredVulns]]
+# id = "GHSA-xxxx-xxxx-xxxx"
+# effectiveUntil = 2026-12-31
+# reason = "No fix is released yet; the code path is not reachable (see issue #N)"

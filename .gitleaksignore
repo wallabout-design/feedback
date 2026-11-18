@@ -1,0 +1,3 @@
+# Findings that gitleaks should not report. One fingerprint per line, as printed
+# by `npm run scan:secrets` (commit:file:rule:line). Every line needs a comment
+# above it saying what the match is and why it is not a secret.

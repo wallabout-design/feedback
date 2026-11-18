@@ -4,7 +4,7 @@
 
 ## Checking a change
 
-Run `npm run verify` (type check, build, unit and end-to-end tests). `dist/` is committed: rebuild it with `npm run build` and commit it with the change, because CI fails if it differs from `src/`.
+Run `npm run verify` (type check, secret and dependency scans, build, unit and end-to-end tests; the scans need `brew install gitleaks osv-scanner`, see README "Scans"). `dist/` is committed: rebuild it with `npm run build` and commit it with the change, because CI fails if it differs from `src/`.
 
 ## Releases
 

@@ -42,7 +42,10 @@ jobs:
       - run: npm ci
       # Everything: type check, build, unit tests, browser tests. The same
       # command as on a laptop (standards/testing.md in wallabout-design/standards).
+      # The scans run in the `scan` job, which has the tools; SKIP_SCANS stops `verify` running them here too.
       - run: npm run verify
+        env:
+          SKIP_SCANS: '1'
       # Sites install dist/ straight from git, so it must match src/.
       - name: dist/ is up to date
         if: always()
@@ -55,3 +58,26 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  # Secrets and known-vulnerable dependencies (standards/security.md, "scans on every
+  # PR"). Required check. The tools are release binaries with pinned SHA-256s
+  # (scripts/ci-install-scan-tools.sh); `gitleaks-action` needs a paid licence.
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      # Full history: gitleaks reads the commits between origin/main and this branch.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: bash scripts/ci-install-scan-tools.sh gitleaks osv-scanner
+      # A push to main has already passed on its pull request, and has no commits
+      # beyond origin/main to scan.
+      - if: github.event_name == 'pull_request'
+        run: npm run scan:secrets
+      - run: npm run scan:deps
