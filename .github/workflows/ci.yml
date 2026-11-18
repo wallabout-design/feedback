@@ -18,7 +18,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - id: version
         run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
 
@@ -34,12 +34,12 @@ jobs:
       image: mcr.microsoft.com/playwright:v${{ needs.playwright.outputs.version }}-noble
       options: --ipc=host
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       # Everything: type check, build, unit tests, browser tests. The same
       # command as on a laptop (standards/testing.md in wallabout-design/standards).
       # The scans run in the `scan` job, which has the tools; SKIP_SCANS stops `verify` running them here too.
@@ -53,7 +53,7 @@ jobs:
         # telling that the directory is safe.
         run: git -c safe.directory="$GITHUB_WORKSPACE" diff --exit-code -- dist || (echo "Run npm run build and commit dist/." && exit 1)
       - if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: playwright-report
           path: playwright-report/
@@ -69,10 +69,10 @@ jobs:
       contents: read
     steps:
       # Full history: gitleaks reads the commits between origin/main and this branch.
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .nvmrc
       - run: bash scripts/ci-install-scan-tools.sh gitleaks osv-scanner
