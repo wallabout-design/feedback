@@ -1,0 +1,5 @@
+# CI jobs that must pass before a PR merges. The hourly job on a maintainer's Mac
+# adds each one to the "Protect main" ruleset once it has passed on main
+# (wallabout repo checks, wallabout-design/standards#284). It never removes one.
+test
+scan
